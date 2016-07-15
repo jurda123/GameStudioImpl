@@ -10,11 +10,18 @@ import sk.tsystems.gamestudio.games.Game;
 public class GuessTheNumber implements Game{
 	private BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 	private int maxNumber;
-   private int guesses = 0;
+	private int guesses = 0;
+
+	
+	
+	public GuessTheNumber(){
+	
+	}
+	
 	
 	public int getScore(){
 	   
-	   return guesses;
+	   return maxNumber - guesses;
    }
 	public void play() {
 		
@@ -33,14 +40,14 @@ public class GuessTheNumber implements Game{
 		secretNumber = random.nextInt(maxNumber);
 		int guess = 0;
 		do {
-			System.out.print("Enter a guess (1-" + maxNumber + "): ");
+			System.out.print("Enter a guess (0-" + maxNumber + "): ");
 			while(true){
 				try {
 				guess = Integer.parseInt(readLine());
 				guesses++;
 				break;
 			} catch (IllegalArgumentException e) {
-				System.err.println("Not an number entered. \nEnter a guess (1-" + maxNumber + "): ");
+				System.err.println("Not an number entered. \nEnter a guess (0-" + maxNumber + "): ");
 			}
 		}
 			if (guess == secretNumber)

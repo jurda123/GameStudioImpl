@@ -1,18 +1,19 @@
 package sk.tsystems.gamestudio.entities;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
 public class CommentEntity {
+	@Id
+	@GeneratedValue
 	private int commentid;
 	private int playerid;
 	private int gameid;
 	private String commentar;
 	
 	 
-	public CommentEntity(int commentid, int playerid, int gameid, String commentar) {
-		super();
-		this.commentid = commentid;
-		this.playerid = playerid;
-		this.gameid = gameid;
-		this.commentar = commentar;
+	public CommentEntity() {
+		
 	}
 	public int getCommentid() {
 		return commentid;

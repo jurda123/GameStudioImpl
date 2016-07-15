@@ -4,7 +4,7 @@ public interface CommentService {
 	
 	public void addComment();
 
-	public void getAllCommentsForGame(String game);
+	public String[] getAllCommentsForGame();
 	
-	public int getNumberOfComments();
+	public int getNumberOfComments(String gameName);
 }

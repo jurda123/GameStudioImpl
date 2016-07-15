@@ -5,27 +5,29 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import sk.tsystems.gamestudio.services.RatingService;
 
-public class RatingJDBC extends ConfigureJDBC implements RatingService{
-	 int gameid;//= getGameId(gameName);
-	 int userid;
-	 int rating;
-	 public static final String GETRATINGCOUNT = "SELECT count(*) from rating where gameid = ?";
-	 public static final String GETRATINGAVG = "SELECT avg(rating) from rating where gameid = ?";
-	 public static final String ADDRATING = "INSERT INTO raing (userid, gameid,score) VALUES (?, ?, ?)";
-	 private String gameName;
-	public RatingJDBC(int gameid, int userid, int rating) {
+public class RatingJDBC extends ConfigureJDBC implements RatingService {
+	int gameid;// = getGameId(gameName);
+	int userid;
+	int rating;
+	public static final String GETRATINGCOUNT = "SELECT count(*) from rating where gameid = ?";
+	public static final String GETRATINGAVG = "SELECT avg(rating) from rating where gameid = ?";
+	public static final String ADDRATING = "INSERT INTO rating (userid, gameid, rating) VALUES (?, ?, ?)";
+	public static final String UPDATERATING = "UPDATE rating SET rating = ? WHERE userid = ? and gameid = ?";
+
+	private String gameName;
+
+	public RatingJDBC(String game, int rating) {
 		super();
-		this.gameid = gameid;
-		this.userid = userid;
+		this.gameid = getGameId(game);
+		this.userid = getUserId(System.getProperty("user.name"));
 		this.rating = rating;
 	}
-	
-	public RatingJDBC(String gameName){
-		this.gameName=gameName;
-		
+
+	public RatingJDBC(String gameName) {
+		this.gameName = gameName;
+
 	}
 
 	@Override
@@ -37,54 +39,68 @@ public class RatingJDBC extends ConfigureJDBC implements RatingService{
 			while (rs.next()) {
 				return rs.getDouble(1);
 			}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return 0;
-		
+		} catch (SQLException e) {
+			System.err.println("Error reading database (getAverageRatingForGame)");
+		}
+		return 0;
+
 	}
-	
+
 	@Override
 	public int getNumberOfRatingForGame(String game) {
 		try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);) {
-		PreparedStatement scoreNextVal = con.prepareStatement(GETRATINGCOUNT);
-		scoreNextVal.setInt(1, getGameId(gameName));
-		ResultSet rs = scoreNextVal.executeQuery();
-		while (rs.next()) {
-			return rs.getInt(1);
-		}
+			PreparedStatement scoreNextVal = con.prepareStatement(GETRATINGCOUNT);
+			scoreNextVal.setInt(1, getGameId(gameName));
+			ResultSet rs = scoreNextVal.executeQuery();
+			while (rs.next()) {
+				return rs.getInt(1);
+			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Error reading database (getNumberOfRatingForGame)");
 		}
 		return 0;
 	}
-	
+
 	@Override
 	public void addRating() {
-		try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
-				PreparedStatement stmt = con.prepareStatement(ADDRATING);) {
-			
-			stmt.setInt(1, userid);
-			stmt.setInt(2, gameid);
-			stmt.setInt(3, rating);
-			stmt.executeUpdate();
-			stmt.close();
-		} catch (SQLException e) {
-			System.err.println("Error reading database (addScore)");
-			
-		}
 		
+		
+			try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+					PreparedStatement stmt = con.prepareStatement(ADDRATING);) {
+
+				stmt.setInt(1, userid);
+				stmt.setInt(2, gameid);
+				stmt.setInt(3, rating);
+				stmt.executeUpdate();
+				stmt.close();
+			} catch (SQLException e) {
+				updateRating();
+				
+				
+			}
+
 	}
 
-	
+	private void updateRating() {
+			try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+					PreparedStatement stmt = con.prepareStatement(UPDATERATING);) {
+				
+				stmt.setInt(1, rating);
+				stmt.setInt(2, userid);
+				stmt.setInt(3, gameid);
+				
+				stmt.executeUpdate();
+				stmt.close();
+			} catch (SQLException e) {
+				System.err.println("Error reading database (updateRating)");
+			
 
-	@Override
-	public void changeRating() {
-		// TODO Auto-generated method stub
+			}
+
 		
+
 	}
-	
+
+
 
 }

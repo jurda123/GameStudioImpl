@@ -1,6 +1,5 @@
 package sk.tsystems.gamestudio.games;
 
-import java.util.ArrayList;
 
 public interface Game {
 

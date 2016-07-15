@@ -6,13 +6,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
+import sk.tsystems.gamestudio.entities.Score;
+import sk.tsystems.gamestudio.entities.ScoreEntity;
 import sk.tsystems.gamestudio.services.ScoreService;
 
 public class ScoreJDBC   extends ConfigureJDBC implements ScoreService{
 	
 	public static final String ADDSCORE = "INSERT INTO score (scoreid,  userid, gameid,score) VALUES (?, ?, ?, ?)";
 	public static final String SCORENEXTVAL = "SELECT scoreid.nextval from dual";
+	public static final String GETALLSCORE = "SELECT player.name,game.name,score.score from score join player on score.USERID=player.USERID join game on GAME.GAMEID = score.gameid where game.gameid = ? order by score desc ";
 	private int score;
 	private int userID;
 	private int gameID;
@@ -46,8 +50,25 @@ public class ScoreJDBC   extends ConfigureJDBC implements ScoreService{
 	}
 
 	@Override
-	public void getTopTenScore() {
-		// TODO Auto-generated method stub
+	public ArrayList<Score> getTopTenScore() {
+		ArrayList<Score> list = new ArrayList<Score>();
+		try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+				PreparedStatement stmt = con.prepareStatement(GETALLSCORE);) {
+			stmt.setInt(1, gameID);
+			ResultSet rs = stmt.executeQuery();
+			while(rs.next()){
+				String userName = rs.getString(1);
+				String playerName = rs.getString(2);
+				int score  = rs.getInt(3);
+				
+				list.add(new Score(userName,playerName,score));
+			}
+		}
+		catch (SQLException e) {
+			System.err.println("Error reading database (getAllCommentsForGame)");
+			e.printStackTrace();
+		}
+		return list;
 		
 	}
 

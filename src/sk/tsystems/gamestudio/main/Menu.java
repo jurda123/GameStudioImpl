@@ -3,7 +3,9 @@ package sk.tsystems.gamestudio.main;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
+import sk.tsystems.gamestudio.entities.Score;
 import sk.tsystems.gamestudio.games.Game;
 import sk.tsystems.gamestudio.services.CommentService;
 import sk.tsystems.gamestudio.services.RatingService;
@@ -27,10 +29,6 @@ public class Menu {
 			System.out.println(String.format("%-7d %-20s %-20.2f %-10d", i + 1, listOfGames[i],
 					ratingService.getAverageRatingForGame(listOfGames[i]),
 					ratingService.getNumberOfRatingForGame(listOfGames[i])));
-			// System.out.println(listOfGames[i] + " " +
-			// ratingService.getAverageRatingForGame(listOfGames[i]) + " " +
-			// ratingService.getNumberOfRatingForGame(listOfGames[i]) );
-			
 		}
 		System.out.println(String.format("%-7d %-20s", listOfGames.length + 1, "EXIT"));
 	}
@@ -61,7 +59,7 @@ public class Menu {
 				playGame("sk.tsystems.gamestudio.games.minesweeper.Minesweeper", "Minesweeper");
 				break;
 			case 2:
-				playGame("sk.tsystems.gamestudio.games.kamene.Core.Stones", "Stones");
+				playGame("sk.tsystems.gamestudio.games.stones.core.Stones", "Stones");
 				break;
 			case 3:
 				playGame("sk.tsystems.gamestudio.games.guessthenumber.GuessTheNumber", "GuessTheNumber");
@@ -80,15 +78,18 @@ public class Menu {
 			Class clazz = Class.forName(path);
 			Game game = (Game) clazz.newInstance();
 			game.play();
+			System.out.println("Your score: " + game.getScore());
+			printTopTenScore(gameName);
 			saveScore(game.getScore(), gameName);
-			commentDialogue(gameName);
+			addComment(gameName);
+			addRating(gameName);
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	private void commentDialogue(String gameName) {
+	private void addComment(String gameName) {
 		System.out.println("Do you wish to add a comment ? \n1: yes\n2:no");
 		int option = 0;
 		try {
@@ -116,6 +117,57 @@ public class Menu {
 	private void saveScore(int score, String name) {
 		ScoreService scoreService = new ScoreJDBC(name, score);
 		scoreService.addScore();
+	}
+
+	private void addRating(String gameName) {
+		System.out.println("Do you wish to rate the game? \n1: yes\n2:no");
+		int option = 0;
+		try {
+			option = Integer.parseInt(readLine());
+		} catch (NumberFormatException e) {
+			System.err.println("Invalid input. Enter option(number)");
+		}
+		switch (option) {
+		case 1:
+			rate(gameName);
+			break;
+		case 2:
+			break;
+		}
+	}
+
+	private void rate(String gameName) {
+		int rating = 0;
+		while (true) {
+			System.out.println("Write rating:");
+			try {
+				rating = Integer.parseInt(readLine());
+				if (rating > 0 && rating <= 5) {
+
+					RatingService ratingService = new RatingJDBC(gameName, rating);
+					ratingService.addRating();
+					break;
+				} else {
+					System.err.println("Rating must be in range 1-5");
+				}
+			} catch (NumberFormatException e) {
+				System.err.println("Invalid input. Rating must be number in range 1-5");
+			}
+
+		}
+
+	}
+	
+	private void printTopTenScore(String gameName){
+		
+		ScoreJDBC s = new ScoreJDBC(gameName, 69);
+		
+		ArrayList<Score> l = s.getTopTenScore();
+		System.out.println("Top 10 for " + gameName); 
+		for(int i = 0;i<10;i++){
+			System.out.println(String.format("%-20s %-10d", l.get(i).getGameName() ,l.get(i).getScore()));
+			
+		}
 	}
 
 }
