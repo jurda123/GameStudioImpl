@@ -8,7 +8,7 @@ public interface RatingService {
 	
 	public void addRating();
 	
-	public int getNumberOfRatingForGame(String game); 
+	public long getNumberOfRatingForGame(String game); 
 	
 	
 

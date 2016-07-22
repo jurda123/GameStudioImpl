@@ -5,14 +5,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-import sk.tsystems.gamestudio.entities.Score;
+import sk.ness.jpa.JpaHelper;
+import sk.tsystems.gamestudio.entities.ScoreStringRepresentation;
 import sk.tsystems.gamestudio.games.Game;
 import sk.tsystems.gamestudio.services.CommentService;
 import sk.tsystems.gamestudio.services.RatingService;
 import sk.tsystems.gamestudio.services.ScoreService;
-import sk.tsystems.gamestudio.services.JDBC.CommentJDBC;
-import sk.tsystems.gamestudio.services.JDBC.RatingJDBC;
-import sk.tsystems.gamestudio.services.JDBC.ScoreJDBC;
+
+import sk.tsystems.gamestudio.services.jpa.CommentHibernate;
+import sk.tsystems.gamestudio.services.jpa.RatingHibernate;
+import sk.tsystems.gamestudio.services.jpa.ScoreHibernate;
 
 public class Menu {
 
@@ -21,11 +23,12 @@ public class Menu {
 	private String[] listOfGames = new String[] { "Minesweeper", "Stones", "GuessTheNumber" };
 
 	private void printMenuAndRating() {
+
 		System.out.println(String.format("%-7s %-20s %-20s %-10s", "option", "Game name  ", "average rating ",
 				"number of ratings "));
 		System.out.println("------------------------------------------------------------------");
 		for (int i = 0; i < listOfGames.length; i++) {
-			RatingService ratingService = new RatingJDBC(listOfGames[i]);
+			RatingService ratingService = new RatingHibernate(listOfGames[i]);
 			System.out.println(String.format("%-7d %-20s %-20.2f %-10d", i + 1, listOfGames[i],
 					ratingService.getAverageRatingForGame(listOfGames[i]),
 					ratingService.getNumberOfRatingForGame(listOfGames[i])));
@@ -45,15 +48,11 @@ public class Menu {
 
 	public void run() {
 		while (true) {
+			new RatingHibernate().getGameId("Minesweeper");
 			printMenuAndRating();
 			System.out.println("-------------------------------");
 			System.out.println("Enter option:");
-			int option = 0;
-			try {
-				option = Integer.parseInt(readLine());
-			} catch (NumberFormatException e) {
-				System.err.println("Invalid input. Enter option(number)");
-			}
+			int option = readFromMenu(4);
 			switch (option) {
 			case 1:
 				playGame("sk.tsystems.gamestudio.games.minesweeper.Minesweeper", "Minesweeper");
@@ -66,6 +65,7 @@ public class Menu {
 				break;
 
 			case 4:
+				JpaHelper.closeAll();
 				return;
 
 			}
@@ -84,19 +84,13 @@ public class Menu {
 			addComment(gameName);
 			addRating(gameName);
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		System.err.print("Error (menu.playGame)");
 		}
 	}
 
 	private void addComment(String gameName) {
-		System.out.println("Do you wish to add a comment ? \n1: yes\n2:no");
-		int option = 0;
-		try {
-			option = Integer.parseInt(readLine());
-		} catch (NumberFormatException e) {
-			System.err.println("Invalid input. Enter option(number)");
-		}
+		System.out.println("Do you wish to add a comment ? \n1: yes\n2: no");
+		int option = readFromMenu(2);
 		switch (option) {
 		case 1:
 			saveComment(gameName);
@@ -110,23 +104,21 @@ public class Menu {
 		String comment = null;
 		System.out.println("Write Commentar:");
 		comment = readLine();
-		CommentService commentService = new CommentJDBC(comment, gameName);
+		//CommentService commentService = new CommentJDBC(comment, gameName);
+		CommentService commentService = new CommentHibernate(comment, gameName);
 		commentService.addComment();
 	}
 
 	private void saveScore(int score, String name) {
-		ScoreService scoreService = new ScoreJDBC(name, score);
+		// ScoreService scoreService = new ScoreJDBC(name, score);
+		ScoreService scoreService = new ScoreHibernate(score, name);
 		scoreService.addScore();
 	}
 
 	private void addRating(String gameName) {
-		System.out.println("Do you wish to rate the game? \n1: yes\n2:no");
-		int option = 0;
-		try {
-			option = Integer.parseInt(readLine());
-		} catch (NumberFormatException e) {
-			System.err.println("Invalid input. Enter option(number)");
-		}
+		System.out.println("Do you wish to rate the game? \n1: yes\n2: no");
+		int option = readFromMenu(2);
+		
 		switch (option) {
 		case 1:
 			rate(gameName);
@@ -143,8 +135,8 @@ public class Menu {
 			try {
 				rating = Integer.parseInt(readLine());
 				if (rating > 0 && rating <= 5) {
-
-					RatingService ratingService = new RatingJDBC(gameName, rating);
+					// RatingService ratingService = new RatingJDBC(gameName, rating);
+					RatingService ratingService = new RatingHibernate(rating, gameName);
 					ratingService.addRating();
 					break;
 				} else {
@@ -153,21 +145,34 @@ public class Menu {
 			} catch (NumberFormatException e) {
 				System.err.println("Invalid input. Rating must be number in range 1-5");
 			}
-
 		}
-
 	}
-	
-	private void printTopTenScore(String gameName){
-		
-		ScoreJDBC s = new ScoreJDBC(gameName, 69);
-		
-		ArrayList<Score> l = s.getTopTenScore();
-		System.out.println("Top 10 for " + gameName); 
-		for(int i = 0;i<10;i++){
-			System.out.println(String.format("%-20s %-10d", l.get(i).getGameName() ,l.get(i).getScore()));
+
+	private void printTopTenScore(String gameName) {
+		// ScoreService s = new ScoreJDBC(gameName,1);
+		ScoreService s = new ScoreHibernate(1, gameName);
+		ArrayList<ScoreStringRepresentation> l = s.getTopTenScore();
+		System.out.println("Top 10 for " + gameName);
+		System.out.println("----------------------------");
+		for (int i = 0; i < 10; i++) {
+			if (i == l.size()) {
+				break;
+			}
+			System.out.println(String.format("%-20s %-10d", l.get(i).getGameName(), l.get(i).getScore()));
+
+			
 			
 		}
+		
+	}
+	private int readFromMenu(int options){
+		int option=0;
+		try {
+			option = Integer.parseInt(readLine());
+		} catch (NumberFormatException e) {
+			System.err.println("Invalid input. Enter option(number) in range 1-" + options);
+		}
+		return option;
 	}
 
 }

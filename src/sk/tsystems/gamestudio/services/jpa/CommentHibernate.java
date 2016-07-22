@@ -1,34 +1,33 @@
 package sk.tsystems.gamestudio.services.jpa;
-
-import java.util.List;
-import java.sql.ResultSet;
-
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
-
 import sk.ness.jpa.JpaHelper;
-import sk.tsystems.gamestudio.entities.CommentEntity;
-import sk.tsystems.gamestudio.games.minesweeper.BestTimes.PlayerTime;
+
+import sk.tsystems.gamestudio.entities.Comment;
 import sk.tsystems.gamestudio.services.CommentService;
 
-public class CommentHibernate implements CommentService{
- CommentEntity com;
-  private String comment;
+public class CommentHibernate extends UtilHibernate implements CommentService {
 	
-	public CommentHibernate(String comment) {
-		com = new CommentEntity();
-		com.setCommentar(comment);
+	private String comment;
+	private String gameName;
+	private EntityManager m= JpaHelper.getEntityManager();
+	public CommentHibernate(String comment, String gameName) {
+		this.comment = comment;
+		this.gameName = gameName;
 	}
-	
+
+	public CommentHibernate() {
+
+	}
+
 	@Override
 	public void addComment() {
 		JpaHelper.beginTransaction();
-		JpaHelper.getEntityManager().persist(comment);
-		EntityManager m = JpaHelper.getEntityManager();
-		Query query = m.createQuery("select s from player s where s.meno=:meno ");
-		List list = query.getResultList();
-		
-
+		Comment c = new Comment();
+		c.getGame().setGameid(getGameId(gameName));
+		c.getPlayer().setUserid(getUserID());
+		c.setCommentar(comment);
+		m.persist(c);
+		JpaHelper.commitTransaction();
 	}
 
 	@Override

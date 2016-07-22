@@ -47,7 +47,7 @@ public class RatingJDBC extends ConfigureJDBC implements RatingService {
 	}
 
 	@Override
-	public int getNumberOfRatingForGame(String game) {
+	public long getNumberOfRatingForGame(String game) {
 		try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);) {
 			PreparedStatement scoreNextVal = con.prepareStatement(GETRATINGCOUNT);
 			scoreNextVal.setInt(1, getGameId(gameName));

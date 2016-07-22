@@ -7,33 +7,31 @@ import java.util.Random;
 
 import sk.tsystems.gamestudio.games.Game;
 
-public class GuessTheNumber implements Game{
+public class GuessTheNumber implements Game {
 	private BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 	private int maxNumber;
 	private int guesses = 0;
 
-	
-	
-	public GuessTheNumber(){
-	
+	public GuessTheNumber() {
+
 	}
-	
-	
-	public int getScore(){
-	   
-	   return maxNumber - guesses;
-   }
+
+	public int getScore() {
+
+		return maxNumber + 5 - guesses;
+	}
+
 	public void play() {
-		
+
 		System.out.println("Insert max number");
-		while(true){
-		try {
-			maxNumber = Integer.parseInt(readLine());
-			break;
-		} catch (IllegalArgumentException e) {
-			System.err.println("Not an number entered. Enter number:");
-		}
-		
+		while (true) {
+			try {
+				maxNumber = Integer.parseInt(readLine());
+				break;
+			} catch (IllegalArgumentException e) {
+				System.err.println("Not an number entered. Enter number:");
+			}
+
 		}
 		int secretNumber;
 		Random random = new Random();
@@ -41,15 +39,15 @@ public class GuessTheNumber implements Game{
 		int guess = 0;
 		do {
 			System.out.print("Enter a guess (0-" + maxNumber + "): ");
-			while(true){
+			while (true) {
 				try {
-				guess = Integer.parseInt(readLine());
-				guesses++;
-				break;
-			} catch (IllegalArgumentException e) {
-				System.err.println("Not an number entered. \nEnter a guess (0-" + maxNumber + "): ");
+					guess = Integer.parseInt(readLine());
+					guesses++;
+					break;
+				} catch (IllegalArgumentException e) {
+					System.err.println("Not an number entered. \nEnter a guess (0-" + maxNumber + "): ");
+				}
 			}
-		}
 			if (guess == secretNumber)
 				System.out.println("Your guess is correct. Congratulations! number of turns: " + guesses);
 			else if (guess < secretNumber)
@@ -59,14 +57,11 @@ public class GuessTheNumber implements Game{
 		} while (guess != secretNumber);
 	}
 
-//	public static void main(String[] args) {
-//		
-//	}
+	// public static void main(String[] args) {
+	//
+	// }
 
 	private String readLine() {
-		// In JDK 6.0 and above Console class can be used
-		// return System.console().readLine();
-
 		try {
 			return input.readLine();
 		} catch (IOException e) {

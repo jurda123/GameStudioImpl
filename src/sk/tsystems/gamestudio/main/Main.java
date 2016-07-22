@@ -1,11 +1,6 @@
 package sk.tsystems.gamestudio.main;
 
-import java.util.ArrayList;
 
-import oracle.net.aso.e;
-import sk.tsystems.gamestudio.entities.Score;
-import sk.tsystems.gamestudio.services.JDBC.CommentJDBC;
-import sk.tsystems.gamestudio.services.JDBC.ScoreJDBC;
 
 public class Main {
 
@@ -16,6 +11,7 @@ public class Main {
 //		for(String s:pole){
 //			System.out.println(s);
 //		}
+	//	java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
 		new Menu().run();
 	
 	}

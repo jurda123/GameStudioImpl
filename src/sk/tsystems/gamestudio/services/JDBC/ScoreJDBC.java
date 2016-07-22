@@ -9,7 +9,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import sk.tsystems.gamestudio.entities.Score;
-import sk.tsystems.gamestudio.entities.ScoreEntity;
+import sk.tsystems.gamestudio.entities.ScoreStringRepresentation;
 import sk.tsystems.gamestudio.services.ScoreService;
 
 public class ScoreJDBC   extends ConfigureJDBC implements ScoreService{
@@ -50,8 +50,8 @@ public class ScoreJDBC   extends ConfigureJDBC implements ScoreService{
 	}
 
 	@Override
-	public ArrayList<Score> getTopTenScore() {
-		ArrayList<Score> list = new ArrayList<Score>();
+	public ArrayList<ScoreStringRepresentation> getTopTenScore() {
+		ArrayList<ScoreStringRepresentation> list = new ArrayList<ScoreStringRepresentation>();
 		try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
 				PreparedStatement stmt = con.prepareStatement(GETALLSCORE);) {
 			stmt.setInt(1, gameID);
@@ -61,7 +61,7 @@ public class ScoreJDBC   extends ConfigureJDBC implements ScoreService{
 				String playerName = rs.getString(2);
 				int score  = rs.getInt(3);
 				
-				list.add(new Score(userName,playerName,score));
+				list.add(new ScoreStringRepresentation(userName,playerName,score));
 			}
 		}
 		catch (SQLException e) {
